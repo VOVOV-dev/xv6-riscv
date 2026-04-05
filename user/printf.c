@@ -130,3 +130,14 @@ printf(const char *fmt, ...)
   va_start(ap, fmt);
   vprintf(1, fmt, ap);
 }
+
+int
+puts(const char *s)
+{
+    int len = strlen(s);
+    if (write(1, s, len) != len)
+        return -1;   // write failed
+    if (write(1, "\n", 1) != 1)
+        return -1;   // write newline failed
+    return len;      
+}

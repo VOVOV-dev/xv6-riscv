@@ -68,6 +68,11 @@ sys_dup(void)
 uint64
 sys_read(void)
 {
+  extern struct spinlock readcount_lock;
+  extern int readcount;
+  acquire(&readcount_lock);
+  readcount++;
+  release(&readcount_lock);
   struct file *f;
   int n;
   uint64 p;
@@ -502,4 +507,17 @@ sys_pipe(void)
     return -1;
   }
   return 0;
+}
+
+struct spinlock readcount_lock;
+int readcount = 0;
+
+uint64
+sys_getreadcount(void)
+{
+  int count;
+  acquire(&readcount_lock);
+  count = readcount;
+  release(&readcount_lock);
+  return count;
 }

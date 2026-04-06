@@ -12,6 +12,8 @@ main()
 {
   if(cpuid() == 0){
     consoleinit();
+  extern struct spinlock readcount_lock;
+  initlock(&readcount_lock, "readcount");
     printfinit();
     printf("\n");
     printf("xv6 kernel is booting\n");

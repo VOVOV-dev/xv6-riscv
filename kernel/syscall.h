@@ -21,4 +21,7 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 
-#define SYS_getreadcount 22
+// proclist
+#define SYS_proclist 22
+
+#define SYS_getreadcount 23

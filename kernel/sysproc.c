@@ -7,6 +7,15 @@
 #include "proc.h"
 #include "vm.h"
 
+// proclist
+#include "proc.h"
+// proclist
+uint64 sys_proclist(void)
+{
+  proclist();
+  return 0;
+}
+
 uint64
 sys_exit(void)
 {

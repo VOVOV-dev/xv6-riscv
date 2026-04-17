@@ -38,6 +38,9 @@ entry("link");
 entry("mkdir");
 entry("chdir");
 entry("dup");
+
+# proclist
+entry("proclist");
 entry("getpid");
 entry("sbrk");
 entry("pause");

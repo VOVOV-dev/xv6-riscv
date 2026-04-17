@@ -688,3 +688,34 @@ procdump(void)
     printf("\n");
   }
 }
+
+// proclist
+// Print all process info with lock, for ps system call
+void proclist(void)
+{
+  printf("proclist called\n");
+  static char *states[] = {
+    [UNUSED]    "UNUSED",
+    [USED]      "USED",
+    [SLEEPING]  "SLEEPING",
+    [RUNNABLE]  "RUNNABLE",
+    [RUNNING]   "RUNNING",
+    [ZOMBIE]    "ZOMBIE"
+  };
+  struct proc *p;
+  char *state;
+
+  printf("PID     PPID    STATE           NAME\n");
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->state != UNUSED) {
+      if(p->state >= 0 && p->state < NELEM(states) && states[p->state])
+        state = states[p->state];
+      else
+        state = "???";
+      int ppid = p->parent ? p->parent->pid : 0;
+      printf("%d\t%d\t%s\t%s\n", p->pid, ppid, state, p->name);
+    }
+    release(&p->lock);
+  }
+}

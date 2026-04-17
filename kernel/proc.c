@@ -1,3 +1,4 @@
+
 #include "types.h"
 #include "param.h"
 #include "memlayout.h"
@@ -690,6 +691,14 @@ procdump(void)
 }
 
 // proclist
+// proclist assist
+void print_padded(const char *s, int width) {
+  int len = 0;
+  for (const char *p = s; *p; p++) len++;
+  printf("%s", s);
+  for (int i = len; i < width; i++)
+    printf(" ");
+}
 // Print all process info with lock, for ps system call
 void proclist(void)
 {
@@ -714,7 +723,10 @@ void proclist(void)
       else
         state = "???";
       int ppid = p->parent ? p->parent->pid : 0;
-      printf("%d\t%d\t%s\t%s\n", p->pid, ppid, state, p->name);
+      printf("%d\t%d\t", p->pid, ppid);
+      print_padded(state, 15);
+      print_padded(p->name, 15);
+      printf("\n");
     }
     release(&p->lock);
   }

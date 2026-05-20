@@ -79,6 +79,9 @@ void            printfinit(void);
 
 // proc.c
 int             cpuid(void);
+//exp6
+int             get_pinfo(uint64);
+//exp6
 void            kexit(int);
 int             kfork(void);
 int             growproc(int);

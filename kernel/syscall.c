@@ -96,6 +96,10 @@ extern uint64 sys_pause(void);
 extern uint64 sys_uptime(void);
 extern uint64 sys_open(void);
 extern uint64 sys_write(void);
+//exp6
+extern uint64 sys_settickets(void);
+extern uint64 sys_getpinfo(void);
+//exp6
 extern uint64 sys_getreadcount(void);
 extern uint64 sys_mknod(void);
 extern uint64 sys_unlink(void);
@@ -125,6 +129,10 @@ static uint64 (*syscalls[])(void) = {
 [SYS_uptime]  sys_uptime,
 [SYS_open]    sys_open,
 [SYS_write]   sys_write,
+[SYS_settickets] sys_settickets,
+[SYS_getpinfo] sys_getpinfo,
+[SYS_settickets] sys_settickets,
+[SYS_getpinfo] sys_getpinfo,
 [SYS_getreadcount] sys_getreadcount,
 [SYS_mknod]   sys_mknod,
 [SYS_unlink]  sys_unlink,

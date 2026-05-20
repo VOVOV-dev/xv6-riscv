@@ -25,3 +25,7 @@
 #define SYS_proclist 22
 
 #define SYS_getreadcount 23
+//exp6
+#define SYS_settickets 24
+#define SYS_getpinfo 25
+//exp6

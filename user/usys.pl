@@ -47,3 +47,7 @@ entry("pause");
 entry("uptime");
 
 entry("getreadcount");
+# exp6
+entry("settickets");
+entry("getpinfo");
+# exp6

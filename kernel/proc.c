@@ -126,6 +126,11 @@ found:
   p->pid = allocpid();
   p->state = USED;
 
+  //exp6
+  p->tickets = 1;
+  p->ticks = 0;
+  //exp6
+
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
@@ -283,6 +288,9 @@ kfork(void)
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
 
+  //exp6: inherit tickets
+  np->tickets = p->tickets;
+
   // increment reference counts on open file descriptors.
   for(i = 0; i < NOFILE; i++)
     if(p->ofile[i])
@@ -415,6 +423,28 @@ kwait(uint64 addr)
   }
 }
 
+//exp6: Random number generator
+static unsigned random_seed = 1;
+
+#define RANDOM_MAX ((1u << 31u) - 1u)
+unsigned lcg_parkmiller(unsigned *state)
+{
+    const unsigned N = 0x7fffffff;
+    const unsigned G = 48271u;
+
+    unsigned div = *state / (N / G);
+    unsigned rem = *state % (N / G);
+
+    unsigned a = rem * G;
+    unsigned b = div * (N % G);
+
+    return *state = (a > b) ? (a - b) : (a + (N - b));
+}
+
+unsigned next_random() {
+    return lcg_parkmiller(&random_seed);
+}
+
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
 // Scheduler never returns.  It loops, doing:
@@ -439,23 +469,40 @@ scheduler(void)
     intr_off();
 
     int found = 0;
+    //exp6: Lottery scheduler
+    int total_tickets = 0;
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
       if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
-
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-        found = 1;
+        total_tickets += p->tickets;
       }
       release(&p->lock);
     }
+
+    if(total_tickets > 0) {
+      long winner = next_random() % total_tickets;
+      int ticket_counter = 0;
+
+      for(p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+        if(p->state == RUNNABLE) {
+          ticket_counter += p->tickets;
+          if(ticket_counter > winner) {
+            p->ticks++;
+            p->state = RUNNING;
+            c->proc = p;
+            swtch(&c->context, &p->context);
+
+            c->proc = 0;
+            found = 1;
+            release(&p->lock);
+            break; // go to a new lottery
+          }
+        }
+        release(&p->lock);
+      }
+    }
+
     if(found == 0) {
       // nothing to run; stop running on this core until an interrupt.
       asm volatile("wfi");
@@ -730,4 +777,30 @@ void proclist(void)
     }
     release(&p->lock);
   }
+}
+
+//exp6
+#include "pstat.h"
+int get_pinfo(uint64 addr) {
+  struct pstat stat;
+  struct proc *p;
+  int i = 0;
+
+  for(p = proc; p < &proc[NPROC]; p++) {
+    acquire(&p->lock);
+    if(p->state != UNUSED) {
+      stat.inuse[i] = 1;
+      stat.pid[i] = p->pid;
+      stat.tickets[i] = p->tickets;
+      stat.ticks[i] = p->ticks;
+    } else {
+      stat.inuse[i] = 0;
+    }
+    release(&p->lock);
+    i++;
+  }
+
+  if(copyout(myproc()->pagetable, addr, (char *)&stat, sizeof(struct pstat)) < 0)
+    return -1;
+  return 0;
 }

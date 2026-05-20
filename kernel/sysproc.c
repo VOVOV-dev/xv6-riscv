@@ -116,3 +116,22 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+//exp6
+uint64 sys_settickets(void) {
+  int t;
+  argint(0, &t);
+  if(t < 1)
+    return -1;
+  myproc()->tickets = t;
+  return 0;
+}
+
+uint64 sys_getpinfo(void) {
+  uint64 addr;
+  argaddr(0, &addr);
+  if(!addr)
+    return -1;
+  return get_pinfo(addr);
+}
+//exp6

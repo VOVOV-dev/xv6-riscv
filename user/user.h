@@ -10,6 +10,11 @@ int pipe(int*);
 int write(int, const void*, int);
 int read(int, void*, int);
 int close(int);
+//exp6
+struct pstat;
+int settickets(int);
+int getpinfo(struct pstat*);
+//exp6
 int kill(int);
 int exec(const char*, char**);
 int open(const char*, int);
